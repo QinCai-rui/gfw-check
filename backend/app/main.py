@@ -34,7 +34,9 @@ USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
 def is_url_valid(url: str) -> bool:
     """Validate URL format"""
     try:
-        result = urlparse(url)
+        # add protocol if missing for validation
+        test_url = url if url.startswith(("http://", "https://")) else f"https://{url}"
+        result = urlparse(test_url)
         return all([result.scheme, result.netloc])
     except Exception:
         return False
