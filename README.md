@@ -8,13 +8,21 @@ This software is made of two parts: a frontend and a backend.
 
 ### Frontend
 
-The frontend is a simple app that allows users to input a URL and see the results (hosted on my server in New Zealand).
+The frontend is a React app that allows users to input a URL and see the results (hosted on my server in New Zealand).
+
+See [frontend/README.md](frontend/README.md) for setup and development instructions.
 
 ### Backend
 
-The backend is basically an API server that gets the URL from the frontend, checks if it is blocked by the GFW, and then returns the results to the frontend.
+The backend is a FastAPI server that gets the URL from the frontend, checks if it is blocked by the GFW, and then returns the results to the frontend.
 
 It is hosted on my Raspberry Pi Zero 2 in Mainland China, which allows it to check if a website is accessible behind the GFW.
+
+Features:
+- RESTful API for checking URLs
+- CORS support for frontend
+
+See [backend/README.md](backend/README.md) for setup and API documentation.
 
 ## Why I made this
 
