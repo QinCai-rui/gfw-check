@@ -1,0 +1,10 @@
+node_modules/
+build/
+dist/
+.env
+.env.local
+.vscode/
+.idea/
+*.log
+# stupid macos. yeah using it for this project
+.DS_Store
