@@ -16,21 +16,16 @@ The backend is basically an API server that gets the URL from the frontend, chec
 
 It is hosted on my Raspberry Pi Zero 2 in Mainland China, which allows it to check if a website is accessible behind the GFW.
 
-
 ## Why I made this
 
 I made this project because I wanted to have a website that can check if a site is accessible behind the GFW, and one that JUST WORKS. In my experience there are many websites out there that claim to do this, but more often than not they just DON'T WORK!!! Or the results are inaccurate.
 
-
 Examples (not comprehensive):
 
-- https://www.chinafirewalltest.com/ (lies about google.com being accessible)
-- https://www.comparitech.com/privacy-security-tools/blockedinchina/ (504 Gateway Timeout)
-- https://blocky.greatfire.org/ (502 Bad Gateway, at least when I tested it)
-- https://proprivacy.com/tools/blockedinchina (says that bing.com is blocked, which is not true)
-- https://www.websitepulse.com/tools/china-firewall-test (hangs indefinitely when I tested it)
-- https://www.cloudwards.net/tools/chinese-firewall-test/ (also hangs indefinitely when I tested it)
-- https://www.dotcom-tools.com/china-firewall-test (kind of works, but the results are inconsistent and it often hangs for a long time)
-
-
-
+- <https://www.chinafirewalltest.com/> (lies about google.com being accessible)
+- <https://www.comparitech.com/privacy-security-tools/blockedinchina/> (504 Gateway Timeout)
+- <https://blocky.greatfire.org/> (502 Bad Gateway, at least when I tested it)
+- <https://proprivacy.com/tools/blockedinchina> (says that bing.com is blocked, which is not true)
+- <https://www.websitepulse.com/tools/china-firewall-test> (hangs indefinitely when I tested it)
+- <https://www.cloudwards.net/tools/chinese-firewall-test/> (also hangs indefinitely when I tested it)
+- <https://www.dotcom-tools.com/china-firewall-test> (kind of works, but the results are inconsistent and it often hangs for a long time)
