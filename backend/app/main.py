@@ -1,7 +1,7 @@
 """
 GFW Check API Backend
 
-todo 21, 165
+todo 21
 """
 
 from datetime import datetime
@@ -121,8 +121,8 @@ async def health():
     """Health check endpoint"""
     return {"status": "ok"}
 
-
-@app.post("/check")
+# TODO switch back to post for prod. get easier for browser
+@app.get("/check")
 async def check_url_endpoint(url: str = Query(..., description="URL to check")):
     """
     Check if a URL is blocked by GFW
@@ -163,8 +163,7 @@ async def check_url_endpoint(url: str = Query(..., description="URL to check")):
         "blocked": check_result["blocked"],
         "status_code": check_result["status_code"],
         "error": check_result["error"],
-        "timestamp": datetime.utcnow().isoformat() + "Z", # TODO forgot syntax. change later
-    }
+        "timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")    }
 
 
 if __name__ == "__main__":
