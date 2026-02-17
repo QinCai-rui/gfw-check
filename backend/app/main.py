@@ -26,7 +26,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-CHECK_TIMEOUT = 10  # seconds
+CHECK_TIMEOUT = 10  
+# seconds. in my experience 10secs is enough, altho the firewall make http response time much higher than usual
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
 
 
