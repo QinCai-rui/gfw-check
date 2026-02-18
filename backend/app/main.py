@@ -4,7 +4,7 @@ GFW Check API Backend
 todo 21
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import asyncio
 import httpx
 import logging
@@ -208,7 +208,8 @@ async def check_url_endpoint(url: str = Query(..., description="URL to check")):
         "blocked": check_result["blocked"],
         "status_code": check_result["status_code"],
         "error": check_result["error"],
-        "timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")    }
+        "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    }
 
 
 @app.get("/check/advanced")
