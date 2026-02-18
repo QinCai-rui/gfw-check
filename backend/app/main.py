@@ -5,10 +5,12 @@ todo 21
 """
 
 from datetime import datetime
+import asyncio
 import httpx
 import logging
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import PlainTextResponse
 from urllib.parse import urlparse
 
 # logging
@@ -113,9 +115,50 @@ async def check_url_accessibility(url: str) -> dict:
         }
 
 
+async def check_url_verbose(url: str) -> str:
+    """
+    Run curl -v and return its output.
+    This block of function was made with assistance from GitHub Copilot.
+    """
+    if not url.startswith(("http://", "https://")):
+        url = f"https://{url}"
+
+    cmd = [
+        "curl",
+        "-sS",          # hide progress bar but show errors
+        "-v",           # verbose for general output
+        "-L",           # follow redirects
+        "-o",
+        "/dev/null",    # redirect body to black hole. don't need it, and also it clutters   
+        "--max-time",
+        str(CHECK_TIMEOUT),
+        "-A",
+        USER_AGENT,
+        url,
+    ]
+
+    try:
+        process = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout_bytes, stderr_bytes = await process.communicate()
+        stdout_text = stdout_bytes.decode(errors="replace") if stdout_bytes else ""
+        stderr_text = stderr_bytes.decode(errors="replace") if stderr_bytes else ""
+        verbose_output = stderr_text + stdout_text
+
+        if not verbose_output.strip():
+            return f"* curl exit code {process.returncode} (no output)"
+
+        return verbose_output.strip()
+    except Exception as e:
+        return f"* Error: {type(e).__name__}: {str(e)}"
+
+
 @app.get("/")
 async def root():
-    return {"message": "GFW Check API", "version": "1.0.0"}
+    return {"message": "GFW Check API (backend)", "version": "1.0.0"}
 
 
 @app.get("/health")
@@ -166,6 +209,24 @@ async def check_url_endpoint(url: str = Query(..., description="URL to check")):
         "status_code": check_result["status_code"],
         "error": check_result["error"],
         "timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")    }
+
+
+@app.get("/check/advanced")
+async def check_url_advanced(url: str = Query(..., description="URL to check (verbose)")):
+    """
+    Return a curl -v style verbose output for the URL.
+    """
+    if not url:
+        raise HTTPException(status_code=400, detail="URL cannot be empty")
+
+    if not is_url_valid(url):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid URL format. Please provide a valid URL (e.g., https://google.com)"
+        )
+
+    verbose_output = await check_url_verbose(url)
+    return PlainTextResponse(verbose_output)
 
 
 if __name__ == "__main__":
