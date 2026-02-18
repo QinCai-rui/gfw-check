@@ -6,12 +6,12 @@ todo 21
 
 from datetime import datetime, timezone
 import asyncio
-import httpx
 import logging
+from urllib.parse import urlparse
+import httpx
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import PlainTextResponse
-from urllib.parse import urlparse
+from fastapi.responses import StreamingResponse
 
 # logging
 logging.basicConfig(level=logging.INFO)
@@ -115,7 +115,7 @@ async def check_url_accessibility(url: str) -> dict:
         }
 
 
-async def check_url_verbose(url: str) -> str:
+async def check_url_verbose(url: str):
     """
     Run curl -v and return its output.
     This block of function was made with assistance from GitHub Copilot.
@@ -127,6 +127,7 @@ async def check_url_verbose(url: str) -> str:
         "curl",
         "-sS",          # hide progress bar but show errors
         "-v",           # verbose for general output
+        "-N",           # no buffering
         "-L",           # follow redirects
         "-o",
         "/dev/null",    # redirect body to black hole. don't need it, and also it clutters   
@@ -141,19 +142,20 @@ async def check_url_verbose(url: str) -> str:
         process = await asyncio.create_subprocess_exec(
             *cmd,
             stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.STDOUT,
         )
-        stdout_bytes, stderr_bytes = await process.communicate()
-        stdout_text = stdout_bytes.decode(errors="replace") if stdout_bytes else ""
-        stderr_text = stderr_bytes.decode(errors="replace") if stderr_bytes else ""
-        verbose_output = stderr_text + stdout_text
+        if process.stdout is None:
+            yield "* Error: No stdout from curl\n"
+            return
 
-        if not verbose_output.strip():
-            return f"* curl exit code {process.returncode} (no output)"
+        async for line in process.stdout:
+            yield line.decode(errors="replace")
 
-        return verbose_output.strip()
+        await process.wait()
+        if process.returncode not in (0, None):
+            yield f"\n* curl exit code {process.returncode}\n"
     except Exception as e:
-        return f"* Error: {type(e).__name__}: {str(e)}"
+        yield f"* Error: {type(e).__name__}: {str(e)}\n"
 
 
 @app.get("/")
@@ -226,8 +228,7 @@ async def check_url_advanced(url: str = Query(..., description="URL to check (ve
             detail="Invalid URL format. Please provide a valid URL (e.g., https://google.com)"
         )
 
-    verbose_output = await check_url_verbose(url)
-    return PlainTextResponse(verbose_output)
+    return StreamingResponse(check_url_verbose(url), media_type="text/plain")
 
 
 if __name__ == "__main__":
